@@ -88,3 +88,10 @@ tensorboard --logdir=runs
 ## ⚙️ Lưu ý về Checkpoints & Data
 - Dữ liệu tập `cifar-10` và các file checkpoint trọng số mô hình (`checkpoints/*.pth`) có dung lượng lớn (đặc biệt VGG-16 > 500MB) vượt quá giới hạn lưu trữ của GitHub (>100MB), do đó đã được khai báo loại trừ trong `.gitignore`.
 - Bạn có thể tải lại dataset tự động bằng cách chạy `train.py` hoặc notebook `practice2_cv_colab.ipynb` trên Google Colab GPU.
+
+---
+
+## 👤 Tác giả thực hiện
+- **Họ và tên**: Nguyễn Hải Anh
+- **GitHub**: [@nguyen-hai-anh06](https://github.com/nguyen-hai-anh06)
+- **Dự án**: Practice 2 - Pre-trained Neural Network Architectures
