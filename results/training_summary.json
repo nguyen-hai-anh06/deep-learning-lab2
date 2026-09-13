@@ -1,0 +1,26 @@
+[
+    {
+        "model_name": "resnet18",
+        "best_val_acc": 81.26,
+        "total_time_seconds": 1237.53,
+        "checkpoint_path": "/content/drive/MyDrive/lab_2_deeplearning_Miss_Tiên/checkpoints/best_resnet18.pth"
+    },
+    {
+        "model_name": "vgg16",
+        "best_val_acc": 81.3,
+        "total_time_seconds": 2840.17,
+        "checkpoint_path": "/content/drive/MyDrive/lab_2_deeplearning_Miss_Tiên/checkpoints/best_vgg16.pth"
+    },
+    {
+        "model_name": "densenet121",
+        "best_val_acc": 82.28,
+        "total_time_seconds": 1955.44,
+        "checkpoint_path": "/content/drive/MyDrive/lab_2_deeplearning_Miss_Tiên/checkpoints/best_densenet121.pth"
+    },
+    {
+        "model_name": "mobilenet_v2",
+        "best_val_acc": 75.97,
+        "total_time_seconds": 1296.78,
+        "checkpoint_path": "/content/drive/MyDrive/lab_2_deeplearning_Miss_Tiên/checkpoints/best_mobilenet_v2.pth"
+    }
+]

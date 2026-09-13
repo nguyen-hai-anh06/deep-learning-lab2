@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Caches and testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Datasets and Large Checkpoints (exceeds GitHub 100MB limit: best_vgg16.pth is 512MB, cifar tar is 162MB)
+data/
+checkpoints/
+*.pth
+*.pt
+*.tar.gz
+
+# Environments & IDEs
+.venv/
+env/
+venv/
+ENV/
+.vscode/
+.idea/
+.DS_Store
+
+# TensorBoard logs
+runs/
+*.tfevents.*

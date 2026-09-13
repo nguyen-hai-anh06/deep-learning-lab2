@@ -1,0 +1,42 @@
+[
+    {
+        "Model Name": "resnet18",
+        "Checkpoint Loaded": true,
+        "Test Accuracy (%)": 81.26,
+        "Test Loss": 0.555,
+        "Total Params (M)": 11.18,
+        "Trainable Params (K)": 5.13,
+        "Model Size (MB)": 42.65,
+        "Latency (ms/batch)": 51.96
+    },
+    {
+        "Model Name": "vgg16",
+        "Checkpoint Loaded": true,
+        "Test Accuracy (%)": 81.3,
+        "Test Loss": 0.5505,
+        "Total Params (M)": 134.3,
+        "Trainable Params (K)": 40.97,
+        "Model Size (MB)": 512.32,
+        "Latency (ms/batch)": 289.85
+    },
+    {
+        "Model Name": "densenet121",
+        "Checkpoint Loaded": true,
+        "Test Accuracy (%)": 82.28,
+        "Test Loss": 0.5221,
+        "Total Params (M)": 6.96,
+        "Trainable Params (K)": 10.25,
+        "Model Size (MB)": 26.57,
+        "Latency (ms/batch)": 181.44
+    },
+    {
+        "Model Name": "mobilenet_v2",
+        "Checkpoint Loaded": true,
+        "Test Accuracy (%)": 75.97,
+        "Test Loss": 0.7076,
+        "Total Params (M)": 2.24,
+        "Trainable Params (K)": 12.81,
+        "Model Size (MB)": 8.53,
+        "Latency (ms/batch)": 56.54
+    }
+]
