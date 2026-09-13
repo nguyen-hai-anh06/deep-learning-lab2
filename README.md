@@ -1,5 +1,7 @@
 # Practice 2: Pre-trained Neural Network Architectures on CIFAR-10
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nguyen-hai-anh06/deep-learning-lab2/blob/main/practice2_cv_colab.ipynb)
+
 Báo cáo và mã nguồn thực nghiệm so sánh 4 kiến trúc mạng nơ-ron học sâu (Deep Convolutional Neural Networks) tiền huấn luyện (Pre-trained on ImageNet-1k) áp dụng kỹ thuật **Transfer Learning (Feature Extraction / Fine-Tuning)** trên tập dữ liệu **CIFAR-10**.
 
 ## 📌 Các kiến trúc khảo sát
@@ -52,7 +54,22 @@ Kết quả đánh giá trên tập kiểm thử (10,000 ảnh CIFAR-10 test set
 
 ## 🚀 Cài đặt & Hướng dẫn sử dụng
 
-### 1. Cài đặt môi trường
+### 0. Chạy trên Google Colab qua GitHub & Google Drive
+
+- **Cách 1 (Mở nhanh 1-Click)**: Bấm trực tiếp vào huy hiệu [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nguyen-hai-anh06/deep-learning-lab2/blob/main/practice2_cv_colab.ipynb) để mở notebook trên Colab.
+- **Cách 2 (Khuyên dùng - Clone vào Google Drive để lưu weights vĩnh viễn)**:
+  1. Mở Google Colab, chọn Runtime GPU T4 (**Runtime** -> **Change runtime type** -> **T4 GPU**).
+  2. Tạo 1 ô code để mount Google Drive và clone dự án từ GitHub:
+     ```python
+     from google.colab import drive
+     drive.mount('/content/drive')
+     %cd /content/drive/MyDrive
+     !git clone https://github.com/nguyen-hai-anh06/deep-learning-lab2.git
+     %cd deep-learning-lab2
+     ```
+  3. Mở file `practice2_cv_colab.ipynb` từ Google Drive để chạy thực nghiệm.
+
+### 1. Cài đặt môi trường (Local máy cá nhân)
 
 Khuyến nghị sử dụng Python 3.10+:
 
