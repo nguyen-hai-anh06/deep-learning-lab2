@@ -3,6 +3,7 @@
 Báo cáo và mã nguồn thực nghiệm so sánh 4 kiến trúc mạng nơ-ron học sâu (Deep Convolutional Neural Networks) tiền huấn luyện (Pre-trained on ImageNet-1k) áp dụng kỹ thuật **Transfer Learning (Feature Extraction / Fine-Tuning)** trên tập dữ liệu **CIFAR-10**.
 
 ## 📌 Các kiến trúc khảo sát
+
 1. **ResNet-18** (Residual Networks - Deep Residual Learning)
 2. **VGG-16** (Visual Geometry Group)
 3. **DenseNet-121** (Densely Connected Convolutional Networks)
@@ -14,12 +15,12 @@ Báo cáo và mã nguồn thực nghiệm so sánh 4 kiến trúc mạng nơ-ron
 
 Kết quả đánh giá trên tập kiểm thử (10,000 ảnh CIFAR-10 test set) với chế độ đóng băng backbone (Freeze Backbone, chỉ huấn luyện classifier):
 
-| Mô hình | Test Accuracy (%) | Test Loss | Tham số (Total) | Tham số huấn luyện (Trainable) | Dung lượng mô hình (MB) | Độ trễ (ms/batch) |
-|---|---|---|---|---|---|---|
-| **DenseNet-121** | **82.28%** | **0.5221** | 6.96 M | 10.25 K | 26.57 MB | 181.44 ms |
-| **VGG-16** | 81.30% | 0.5505 | 134.30 M | 40.97 K | 512.32 MB | 289.85 ms |
-| **ResNet-18** | 81.26% | 0.5550 | 11.18 M | 5.13 K | 42.65 MB | **51.96 ms** |
-| **MobileNetV2** | 75.97% | 0.7076 | **2.24 M** | 12.81 K | **8.53 MB** | 56.54 ms |
+| Mô hình              | Test Accuracy (%) | Test Loss        | Tham số (Total) | Tham số huấn luyện (Trainable) | Dung lượng mô hình (MB) | Độ trễ (ms/batch) |
+| ---------------------- | ----------------- | ---------------- | ---------------- | --------------------------------- | --------------------------- | -------------------- |
+| **DenseNet-121** | **82.28%**  | **0.5221** | 6.96 M           | 10.25 K                           | 26.57 MB                    | 181.44 ms            |
+| **VGG-16**       | 81.30%            | 0.5505           | 134.30 M         | 40.97 K                           | 512.32 MB                   | 289.85 ms            |
+| **ResNet-18**    | 81.26%            | 0.5550           | 11.18 M          | 5.13 K                            | 42.65 MB                    | **51.96 ms**   |
+| **MobileNetV2**  | 75.97%            | 0.7076           | **2.24 M** | 12.81 K                           | **8.53 MB**           | 56.54 ms             |
 
 > Xem phân tích chi tiết và kịch bản thuyết trình tại [presentation.md](presentation.md).
 
@@ -52,33 +53,41 @@ Kết quả đánh giá trên tập kiểm thử (10,000 ảnh CIFAR-10 test set
 ## 🚀 Cài đặt & Hướng dẫn sử dụng
 
 ### 1. Cài đặt môi trường
+
 Khuyến nghị sử dụng Python 3.10+:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 2. Huấn luyện mô hình
+
 - Huấn luyện một mô hình cụ thể (ví dụ: `resnet18`):
+
 ```bash
 python train.py --model resnet18 --epochs 10 --batch_size 64
 ```
 
 - Huấn luyện toàn bộ 4 mô hình:
+
 ```bash
 python train.py --model all --epochs 10
 ```
 
 - Chạy thử nghiệm nhanh (Dry-run với tập mẫu nhỏ 500 ảnh):
+
 ```bash
 python train.py --model mobilenet_v2 --subset 500 --epochs 2
 ```
 
 ### 3. Đánh giá mô hình
+
 ```bash
 python run_evaluation.py
 ```
 
 ### 4. Giám sát với TensorBoard
+
 ```bash
 tensorboard --logdir=runs
 ```
@@ -86,12 +95,14 @@ tensorboard --logdir=runs
 ---
 
 ## ⚙️ Lưu ý về Checkpoints & Data
+
 - Dữ liệu tập `cifar-10` và các file checkpoint trọng số mô hình (`checkpoints/*.pth`) có dung lượng lớn (đặc biệt VGG-16 > 500MB) vượt quá giới hạn lưu trữ của GitHub (>100MB), do đó đã được khai báo loại trừ trong `.gitignore`.
 - Bạn có thể tải lại dataset tự động bằng cách chạy `train.py` hoặc notebook `practice2_cv_colab.ipynb` trên Google Colab GPU.
 
 ---
 
 ## 👤 Tác giả thực hiện
-- **Họ và tên**: Nguyễn Hải Anh
+
+- **Họ và tên**: Nguyễn Hải Anh - UTH
 - **GitHub**: [@nguyen-hai-anh06](https://github.com/nguyen-hai-anh06)
 - **Dự án**: Practice 2 - Pre-trained Neural Network Architectures
