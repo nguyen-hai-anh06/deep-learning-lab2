@@ -13,8 +13,6 @@ Dự án so sánh ResNet-18, VGG-16, DenseNet-121 và MobileNetV4 Conv Small b�
 
 Mở `team_training_colab.ipynb`, bật GPU và chạy lần lượt các cell. Notebook lưu kết quả bền vững tại:
 
-`practice2_cv_colab.ipynb` là notebook cũ chứa kết quả MobileNetV2; không dùng notebook đó cho đợt thực nghiệm mới.
-
 ```text
 /content/drive/MyDrive/Lab2_Experiments/
   trainer_a/<run_id>/

@@ -37,7 +37,7 @@ from lab2_cv.services.trainer_service import train_model  # noqa: E402
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train one reproducible CIFAR-10 experiment")
     parser.add_argument("--model", choices=[*SUPPORTED_MODELS, "all"], default="resnet18")
-    parser.add_argument("--strategy", choices=["freeze", "finetune_last", "full"], default="freeze")
+    parser.add_argument("--strategy", choices=["freeze", "finetune_last"], default="freeze")
     parser.add_argument("--epochs", type=int, default=NUM_EPOCHS)
     parser.add_argument("--batch-size", "--batch_size", dest="batch_size", type=int, default=BATCH_SIZE)
     parser.add_argument("--lr", type=float, default=LEARNING_RATE)
@@ -178,12 +178,11 @@ def run_one(args: argparse.Namespace, model_name: str) -> Dict[str, Any]:
         if not os.path.exists(resume_path):
             raise FileNotFoundError(resume_path)
 
-    freeze_backbone = args.strategy != "full"
     fine_tune_last = args.strategy == "finetune_last"
     model = build_model(
         model_name,
         num_classes=NUM_CLASSES,
-        freeze_backbone=freeze_backbone,
+        freeze_backbone=True,
         pretrained=not bool(resume_path),
         fine_tune_last_layers=fine_tune_last,
     )

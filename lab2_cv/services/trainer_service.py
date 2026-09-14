@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from lab2_cv.config import DEVICE, LEARNING_RATE, MOMENTUM, WEIGHT_DECAY
+from lab2_cv.config import DEVICE, MOMENTUM
 from lab2_cv.services.logger_service import TensorBoardLogger
 from lab2_cv.services.model_service import set_frozen_batchnorm_eval
 

@@ -28,3 +28,8 @@ ENV/
 # TensorBoard logs
 runs/
 *.tfevents.*
+
+# Generated experiment summaries (checkpoints are stored on Google Drive)
+results/experiments/
+results/validation_summary/
+results/final_evaluation/
