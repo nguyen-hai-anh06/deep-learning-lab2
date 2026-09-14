@@ -1,6 +1,7 @@
 # Danh sách các thư viện cần thiết cho dự án Practice 2 - CIFAR-10 Pre-trained Architectures
 torch>=2.0.0
 torchvision>=0.15.0
+timm>=1.0.9
 torchinfo>=1.8.0
 tensorboard>=2.14.0
 pytest>=7.0.0

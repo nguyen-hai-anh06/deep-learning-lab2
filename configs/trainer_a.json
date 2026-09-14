@@ -1,0 +1,46 @@
+{
+  "member_id": "trainer_a",
+  "seed": 42,
+  "experiments": [
+    {
+      "run_id": "vgg16_freeze_baseline",
+      "model": "vgg16",
+      "strategy": "freeze",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    },
+    {
+      "run_id": "vgg16_finetune_last",
+      "model": "vgg16",
+      "strategy": "finetune_last",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.0001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    },
+    {
+      "run_id": "mobilenetv4_freeze_baseline",
+      "model": "mobilenetv4_conv_small",
+      "strategy": "freeze",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    },
+    {
+      "run_id": "mobilenetv4_finetune_last",
+      "model": "mobilenetv4_conv_small",
+      "strategy": "finetune_last",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.0001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    }
+  ]
+}
