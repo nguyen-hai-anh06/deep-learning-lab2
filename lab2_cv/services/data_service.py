@@ -1,130 +1,130 @@
-"""
-Module data_service: Quản lý toàn bộ quy trình tiền xử lý, tăng cường dữ liệu (Data Augmentation)
-và nạp dữ liệu (Data Loading) cho tập dữ liệu CIFAR-10 chuẩn hóa theo ImageNet.
-"""
+"""Deterministic CIFAR-10 train/validation/test input pipeline."""
 
-import os
-from typing import Tuple, Optional
+from typing import Dict, Optional, Tuple
+
 import torch
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 
 from lab2_cv.config import (
+    BATCH_SIZE,
+    DATA_DIR,
     IMAGE_SIZE,
     IMAGENET_MEAN,
     IMAGENET_STD,
-    BATCH_SIZE,
     NUM_WORKERS,
-    DATA_DIR,
+    RANDOM_SEED,
+    VALIDATION_RATIO,
 )
 
 
 def get_cifar10_transforms() -> Tuple[transforms.Compose, transforms.Compose]:
-    """
-    Tạo pipeline biến đổi hình ảnh (Transforms) cho tập Train và Test.
-    
-    Lý do thiết kế:
-    1. CIFAR-10 có kích thước gốc 32x32 pixel.
-    2. Các mô hình Pre-trained trên ImageNet (ResNet, VGG, DenseNet, MobileNet) được thiết kế
-       với receptive field và các lớp stride/pooling tối ưu cho ảnh kích thước 224x224.
-    3. Do đó, cần Resize về (224, 224) và chuẩn hóa theo đúng mean & std của ImageNet
-       để tận dụng tối đa trọng số đã học (Transfer Learning).
-    
-    Returns:
-        Tuple[transforms.Compose, transforms.Compose]: (train_transforms, test_transforms)
-    """
-    train_transforms = transforms.Compose([
-        # Bước 1: Resize từ 32x32 lên 224x224 để phù hợp kiến trúc mạng pre-trained
+    """Return stochastic train transforms and deterministic evaluation transforms."""
+    train_transform = transforms.Compose([
         transforms.Resize(IMAGE_SIZE),
-        
-        # Bước 2: Tăng cường dữ liệu (Data Augmentation) chống overfitting
-        transforms.RandomHorizontalFlip(p=0.5), # Lật ngang ngẫu nhiên
-        transforms.RandomRotation(degrees=10),   # Xoay nhẹ góc tối đa 10 độ
-        
-        # Bước 3: Chuyển đổi định dạng PIL Image sang Tensor [C, H, W] trong dải [0.0, 1.0]
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=10),
         transforms.ToTensor(),
-        
-        # Bước 4: Chuẩn hóa theo phân phối thống kê của tập ImageNet-1k
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
     ])
-
-    test_transforms = transforms.Compose([
-        # Bước 1: Resize kích thước tương tự tập train
+    eval_transform = transforms.Compose([
         transforms.Resize(IMAGE_SIZE),
-        
-        # Bước 2: Không áp dụng data augmentation ngẫu nhiên cho tập kiểm thử (chỉ giữ nguyên dữ liệu gốc)
         transforms.ToTensor(),
-        
-        # Bước 3: Chuẩn hóa cùng tham số ImageNet
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+        transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
     ])
+    return train_transform, eval_transform
 
-    return train_transforms, test_transforms
+
+def create_split_indices(
+    dataset_size: int = 50_000,
+    validation_ratio: float = VALIDATION_RATIO,
+    seed: int = RANDOM_SEED,
+) -> Tuple[list[int], list[int]]:
+    """Create a reproducible, non-overlapping train/validation split."""
+    if not 0.0 < validation_ratio < 1.0:
+        raise ValueError("validation_ratio phải nằm trong khoảng (0, 1)")
+    generator = torch.Generator().manual_seed(seed)
+    indices = torch.randperm(dataset_size, generator=generator).tolist()
+    validation_size = int(dataset_size * validation_ratio)
+    return indices[validation_size:], indices[:validation_size]
+
+
+def get_split_metadata(
+    train_indices: list[int], val_indices: list[int], test_size: int, seed: int
+) -> Dict[str, object]:
+    """Metadata used to verify that every teammate used the same split."""
+    checksum = sum((position + 1) * index for position, index in enumerate(val_indices))
+    return {
+        "dataset": "CIFAR10",
+        "seed": seed,
+        "train_size": len(train_indices),
+        "validation_size": len(val_indices),
+        "test_size": test_size,
+        "validation_indices_checksum": str(checksum),
+    }
 
 
 def get_cifar10_dataloaders(
     data_dir: str = DATA_DIR,
     batch_size: int = BATCH_SIZE,
     num_workers: int = NUM_WORKERS,
+    validation_ratio: float = VALIDATION_RATIO,
+    seed: int = RANDOM_SEED,
     subset_size: Optional[int] = None,
     pin_memory: bool = True,
-) -> Tuple[DataLoader, DataLoader]:
-    """
-    Tải tập dữ liệu CIFAR-10 từ torchvision và đóng gói vào PyTorch DataLoader.
-    
-    Args:
-        data_dir (str): Thư mục lưu dữ liệu CIFAR-10.
-        batch_size (int): Kích thước mỗi mini-batch. Mặc định lấy từ config.
-        num_workers (int): Số lượng workers phụ trợ nạp dữ liệu.
-        subset_size (Optional[int]): Lấy mẫu một phần dữ liệu nhỏ để test nhanh pipeline.
-        pin_memory (bool): Đẩy tensor vào pinned memory trên host để truyền nhanh sang GPU.
-        
-    Returns:
-        Tuple[DataLoader, DataLoader]: (train_loader, test_loader)
-    """
-    train_transform, test_transform = get_cifar10_transforms()
+) -> Tuple[DataLoader, DataLoader, DataLoader, Dict[str, object]]:
+    """Return independent train, validation and test loaders plus split metadata."""
+    train_transform, eval_transform = get_cifar10_transforms()
 
-    # Tải tập huấn luyện CIFAR-10 (50,000 ảnh)
-    train_dataset = datasets.CIFAR10(
-        root=data_dir,
-        train=True,
-        download=True,
-        transform=train_transform,
+    # Separate objects ensure validation never receives random augmentation.
+    train_source = datasets.CIFAR10(data_dir, train=True, download=True, transform=train_transform)
+    val_source = datasets.CIFAR10(data_dir, train=True, download=True, transform=eval_transform)
+    test_dataset = datasets.CIFAR10(data_dir, train=False, download=True, transform=eval_transform)
+
+    train_indices, val_indices = create_split_indices(
+        len(train_source), validation_ratio=validation_ratio, seed=seed
     )
+    if subset_size is not None:
+        if subset_size <= 0:
+            raise ValueError("subset_size phải lớn hơn 0")
+        train_indices = train_indices[: min(subset_size, len(train_indices))]
+        val_target = max(1, int(subset_size * validation_ratio))
+        val_indices = val_indices[: min(val_target, len(val_indices))]
+        test_target = max(1, subset_size // 5)
+        test_dataset = Subset(test_dataset, range(min(test_target, len(test_dataset))))
 
-    # Tải tập kiểm thử CIFAR-10 (10,000 ảnh)
-    test_dataset = datasets.CIFAR10(
-        root=data_dir,
-        train=False,
-        download=True,
-        transform=test_transform,
-    )
-
-    # Nếu người dùng chỉ định subset_size (thường dùng trong Unit Test hoặc Dry Run)
-    if subset_size is not None and subset_size > 0:
-        train_indices = list(range(min(subset_size, len(train_dataset))))
-        test_indices = list(range(min(max(1, subset_size // 5), len(test_dataset))))
-        train_dataset = Subset(train_dataset, train_indices)
-        test_dataset = Subset(test_dataset, test_indices)
-
-    # Tạo DataLoader cho tập Train (xáo trộn dữ liệu shuffle=True)
+    train_dataset = Subset(train_source, train_indices)
+    val_dataset = Subset(val_source, val_indices)
+    use_pin_memory = pin_memory and torch.cuda.is_available()
+    loader_args = {
+        "batch_size": batch_size,
+        "num_workers": num_workers,
+        "pin_memory": use_pin_memory,
+        "persistent_workers": num_workers > 0,
+    }
+    train_generator = torch.Generator().manual_seed(seed)
     train_loader = DataLoader(
-        dataset=train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=pin_memory and torch.cuda.is_available(),
-        drop_last=False,
+        train_dataset, shuffle=True, generator=train_generator, drop_last=False, **loader_args
     )
+    val_loader = DataLoader(val_dataset, shuffle=False, drop_last=False, **loader_args)
+    test_loader = DataLoader(test_dataset, shuffle=False, drop_last=False, **loader_args)
+    metadata = get_split_metadata(train_indices, val_indices, len(test_dataset), seed)
+    return train_loader, val_loader, test_loader, metadata
 
-    # Tạo DataLoader cho tập Test (không xáo trộn shuffle=False)
-    test_loader = DataLoader(
-        dataset=test_dataset,
+
+def get_cifar10_test_loader(
+    data_dir: str = DATA_DIR,
+    batch_size: int = BATCH_SIZE,
+    num_workers: int = NUM_WORKERS,
+) -> DataLoader:
+    """Load the untouched official test set for the final evaluation only."""
+    _, eval_transform = get_cifar10_transforms()
+    dataset = datasets.CIFAR10(data_dir, train=False, download=True, transform=eval_transform)
+    return DataLoader(
+        dataset,
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=pin_memory and torch.cuda.is_available(),
-        drop_last=False,
+        pin_memory=torch.cuda.is_available(),
+        persistent_workers=num_workers > 0,
     )
-
-    return train_loader, test_loader

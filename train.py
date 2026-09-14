@@ -1,227 +1,232 @@
-"""
-Script train.py: Chạy quá trình Fine-tuning / Transfer Learning trên tập dữ liệu CIFAR-10.
-Hỗ trợ huấn luyện từng mô hình riêng biệt hoặc chạy tự động lần lượt cả 4 mô hình:
-['resnet18', 'vgg16', 'densenet121', 'mobilenet_v2'].
+"""Colab-friendly experiment runner with isolated logs and resumable checkpoints."""
 
-Cách sử dụng dòng lệnh (CLI):
-1. Huấn luyện một mô hình cụ thể:
-   python train.py --model resnet18 --epochs 10 --batch_size 64
-
-2. Huấn luyện toàn bộ 4 mô hình:
-   python train.py --model all --epochs 10
-
-3. Chạy thử nghiệm nhanh (Dry run) với tập mẫu nhỏ (ví dụ 500 ảnh):
-   python train.py --model mobilenet_v2 --subset 500 --epochs 2
-"""
-
-import os
-import sys
-import json
 import argparse
+import hashlib
+import json
+import os
+import platform
+import random
+import subprocess
+import sys
+from datetime import datetime
+from typing import Any, Dict
+
+import numpy as np
 import torch
 
-# Đảm bảo in tiếng Việt chuẩn trên Windows console
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-
-# Đảm bảo import được module lab2_cv khi chạy trực tiếp từ thư mục gốc
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from lab2_cv.config import (
-    SUPPORTED_MODELS,
+from lab2_cv.config import (  # noqa: E402
     BATCH_SIZE,
-    LEARNING_RATE,
-    NUM_EPOCHS,
-    NUM_CLASSES,
-    DEVICE,
-    CHECKPOINT_DIR,
-    LOG_DIR,
-    RESULTS_DIR,
     DATA_DIR,
+    LEARNING_RATE,
+    NUM_CLASSES,
+    NUM_EPOCHS,
+    RANDOM_SEED,
+    RESULTS_DIR,
+    SUPPORTED_MODELS,
+    VALIDATION_RATIO,
+    WEIGHT_DECAY,
 )
-from lab2_cv.services.data_service import get_cifar10_dataloaders
-from lab2_cv.services.model_service import build_model, inspect_model
-from lab2_cv.services.trainer_service import train_model
-from lab2_cv.services.logger_service import TensorBoardLogger
+from lab2_cv.services.data_service import get_cifar10_dataloaders  # noqa: E402
+from lab2_cv.services.logger_service import TensorBoardLogger  # noqa: E402
+from lab2_cv.services.model_service import build_model, count_parameters, inspect_model  # noqa: E402
+from lab2_cv.services.trainer_service import train_model  # noqa: E402
 
 
 def parse_arguments() -> argparse.Namespace:
-    """Định nghĩa và phân tích các tham số dòng lệnh."""
-    parser = argparse.ArgumentParser(
-        description="Huấn luyện mô hình Pre-trained trên CIFAR-10 (Practice 2)",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    parser.add_argument(
-        "--model",
-        type=str,
-        default="all",
-        help=f"Tên mô hình cần train: {SUPPORTED_MODELS} hoặc 'all' để chạy tuần tự cả 4 models",
-    )
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        default=NUM_EPOCHS,
-        help="Số lượng epochs huấn luyện cho mỗi mô hình",
-    )
-    parser.add_argument(
-        "--batch_size",
-        type=int,
-        default=BATCH_SIZE,
-        help="Kích thước mini-batch",
-    )
-    parser.add_argument(
-        "--lr",
-        type=float,
-        default=LEARNING_RATE,
-        help="Tốc độ học (Learning Rate)",
-    )
-    parser.add_argument(
-        "--optimizer",
-        type=str,
-        choices=["adam", "sgd"],
-        default="adam",
-        help="Thuật toán tối ưu hóa (Optimizer)",
-    )
-    parser.add_argument(
-        "--freeze",
-        action="store_true",
-        default=True,
-        help="Đóng băng Feature Extractor, chỉ huấn luyện lớp Classifier cuối",
-    )
-    parser.add_argument(
-        "--unfreeze",
-        action="store_false",
-        dest="freeze",
-        help="Mở khóa toàn bộ mạng để Fine-tune tất cả các tầng",
-    )
-    parser.add_argument(
-        "--fine_tune_last",
-        action="store_true",
-        default=False,
-        help="Mở khóa một vài tầng cuối của backbone để Fine-tuning (Step 4 của Lab)",
-    )
-    parser.add_argument(
-        "--subset",
-        type=int,
-        default=None,
-        help="Số lượng mẫu train giới hạn (hữu ích khi muốn chạy thử nhanh)",
-    )
-    parser.add_argument(
-        "--device",
-        type=str,
-        default=str(DEVICE),
-        help="Thiết bị tính toán: 'cuda', 'cpu', hoặc 'cuda:0'",
-    )
-
+    parser = argparse.ArgumentParser(description="Train one reproducible CIFAR-10 experiment")
+    parser.add_argument("--model", choices=[*SUPPORTED_MODELS, "all"], default="resnet18")
+    parser.add_argument("--strategy", choices=["freeze", "finetune_last", "full"], default="freeze")
+    parser.add_argument("--epochs", type=int, default=NUM_EPOCHS)
+    parser.add_argument("--batch-size", "--batch_size", dest="batch_size", type=int, default=BATCH_SIZE)
+    parser.add_argument("--lr", type=float, default=LEARNING_RATE)
+    parser.add_argument("--optimizer", choices=["adamw", "sgd"], default="adamw")
+    parser.add_argument("--weight-decay", type=float, default=WEIGHT_DECAY)
+    parser.add_argument("--seed", type=int, default=RANDOM_SEED)
+    parser.add_argument("--validation-ratio", type=float, default=VALIDATION_RATIO)
+    parser.add_argument("--member-id", default="manager")
+    parser.add_argument("--run-id", default=None, help="Stable ID required when using --resume auto")
+    parser.add_argument("--output-root", default=os.path.join(RESULTS_DIR, "experiments"))
+    parser.add_argument("--data-dir", default=DATA_DIR)
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--num-workers", type=int, default=2)
+    parser.add_argument("--subset", type=int, default=None)
+    parser.add_argument("--resume", default=None, help="Checkpoint path, or 'auto' for run_dir/checkpoints/last.pt")
+    parser.add_argument("--inspect", action="store_true", help="Print model and torchinfo summary")
+    parser.add_argument("--log-graph", action="store_true", help="Add model graph to TensorBoard")
+    parser.add_argument("--no-amp", action="store_true")
     return parser.parse_args()
 
 
-def run_training_pipeline(args: argparse.Namespace) -> None:
-    """Quản lý toàn bộ tiến trình huấn luyện các mô hình theo tham số được chỉ định."""
-    device = torch.device(args.device)
-    strategy_str = "Fine-tune Last Layers (Step 4)" if args.fine_tune_last else ("Freeze Backbone (Feature Extraction)" if args.freeze else "Unfreeze All (Full Fine-tuning)")
-    print(f"\n=======================================================")
-    print(f"      PRACTICE 2 - CIFAR-10 TRANSFER LEARNING          ")
-    print(f"=======================================================")
-    print(f" Thiết bị (Device)      : {device}")
-    print(f" Chiến lược huấn luyện  : {strategy_str}")
-    print(f" Epochs                  : {args.epochs}")
-    print(f" Batch size              : {args.batch_size}")
-    print(f" Learning rate           : {args.lr}")
-    print(f" Optimizer               : {args.optimizer.upper()}")
-    print(f" Dữ liệu mẫu (Subset)    : {args.subset if args.subset else 'Toàn bộ CIFAR-10 (50k train, 10k test)'}")
-    print(f"=======================================================\n")
+def set_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
-    # 1. Tải dữ liệu CIFAR-10
-    print("[1/3] Đang chuẩn bị dữ liệu CIFAR-10 với Transforms ImageNet...")
-    train_loader, test_loader = get_cifar10_dataloaders(
-        data_dir=DATA_DIR,
+
+def atomic_json(payload: Dict[str, Any], path: str) -> None:
+    temporary = f"{path}.tmp"
+    with open(temporary, "w", encoding="utf-8") as file:
+        json.dump(payload, file, ensure_ascii=False, indent=2)
+    os.replace(temporary, path)
+
+
+def source_fingerprint() -> str:
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(project_dir, "train.py"),
+        os.path.join(project_dir, "requirements.txt"),
+    ]
+    for root, _, filenames in os.walk(os.path.join(project_dir, "lab2_cv")):
+        candidates.extend(os.path.join(root, name) for name in filenames if name.endswith(".py"))
+    digest = hashlib.sha256()
+    for path in sorted(candidates):
+        relative = os.path.relpath(path, project_dir).replace(os.sep, "/")
+        digest.update(relative.encode("utf-8"))
+        with open(path, "rb") as file:
+            digest.update(file.read())
+    return digest.hexdigest()
+
+
+def environment_info(device: torch.device) -> Dict[str, Any]:
+    try:
+        git_commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=os.path.dirname(os.path.abspath(__file__)), text=True
+        ).strip()
+    except (OSError, subprocess.SubprocessError):
+        git_commit = None
+    return {
+        "python": sys.version,
+        "platform": platform.platform(),
+        "torch": torch.__version__,
+        "torchvision": __import__("torchvision").__version__,
+        "timm": __import__("timm").__version__,
+        "device": str(device),
+        "gpu": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
+        "git_commit": git_commit,
+        "source_fingerprint": source_fingerprint(),
+    }
+
+
+def run_one(args: argparse.Namespace, model_name: str) -> Dict[str, Any]:
+    set_seed(args.seed)
+    device = torch.device(args.device)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_id = args.run_id or f"{args.member_id}_{model_name}_{args.strategy}_{timestamp}"
+    if args.model == "all" and args.run_id:
+        run_id = f"{args.run_id}_{model_name}"
+    run_dir = os.path.abspath(os.path.join(args.output_root, args.member_id, run_id))
+    os.makedirs(run_dir, exist_ok=True)
+
+    run_config = {
+        "run_id": run_id,
+        "member_id": args.member_id,
+        "model": model_name,
+        "strategy": args.strategy,
+        "pretrained": True,
+        "num_classes": NUM_CLASSES,
+        "epochs": args.epochs,
+        "batch_size": args.batch_size,
+        "learning_rate": args.lr,
+        "optimizer": args.optimizer,
+        "weight_decay": args.weight_decay,
+        "momentum": 0.9,
+        "scheduler": "StepLR",
+        "scheduler_step_size": 5,
+        "scheduler_gamma": 0.1,
+        "seed": args.seed,
+        "validation_ratio": args.validation_ratio,
+        "amp": not args.no_amp,
+        "subset_size": args.subset,
+    }
+    config_path = os.path.join(run_dir, "config.json")
+    if args.resume and os.path.exists(config_path):
+        with open(config_path, encoding="utf-8") as file:
+            previous_config = json.load(file)
+        protected_keys = (
+            "run_id", "member_id", "model", "strategy", "batch_size", "learning_rate",
+            "optimizer", "weight_decay", "seed", "validation_ratio", "subset_size",
+        )
+        changed = [key for key in protected_keys if previous_config.get(key) != run_config.get(key)]
+        if changed:
+            raise ValueError(f"Không thể resume vì cấu hình đã đổi: {changed}")
+    atomic_json(run_config, config_path)
+    atomic_json(environment_info(device), os.path.join(run_dir, "environment.json"))
+
+    train_loader, val_loader, _, split_metadata = get_cifar10_dataloaders(
+        data_dir=args.data_dir,
         batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        validation_ratio=args.validation_ratio,
+        seed=args.seed,
         subset_size=args.subset,
     )
-    print(f" -> Train Batches: {len(train_loader)} (khoảng {len(train_loader.dataset):,} ảnh)")
-    print(f" -> Test Batches : {len(test_loader)} (khoảng {len(test_loader.dataset):,} ảnh)")
+    atomic_json(split_metadata, os.path.join(run_dir, "split.json"))
 
-    # 2. Xác định danh sách các mô hình cần huấn luyện
-    if args.model.lower() == "all":
-        models_to_train = SUPPORTED_MODELS
-    else:
-        if args.model.lower() not in SUPPORTED_MODELS:
-            print(f"[LỖI] Mô hình '{args.model}' không hợp lệ. Chọn từ: {SUPPORTED_MODELS}")
-            sys.exit(1)
-        models_to_train = [args.model.lower()]
+    resume_path = args.resume
+    if resume_path == "auto":
+        resume_path = os.path.join(run_dir, "checkpoints", "last.pt")
+        if not os.path.exists(resume_path):
+            raise FileNotFoundError(f"Không có checkpoint để resume: {resume_path}")
+    elif resume_path:
+        resume_path = os.path.abspath(resume_path)
+        if not os.path.exists(resume_path):
+            raise FileNotFoundError(resume_path)
 
-    summary_results = []
+    freeze_backbone = args.strategy != "full"
+    fine_tune_last = args.strategy == "finetune_last"
+    model = build_model(
+        model_name,
+        num_classes=NUM_CLASSES,
+        freeze_backbone=freeze_backbone,
+        pretrained=not bool(resume_path),
+        fine_tune_last_layers=fine_tune_last,
+    )
+    model.eval()
+    parameter_counts = count_parameters(model)
+    model_statistics = inspect_model(
+        model, input_size=(1, 3, 224, 224), device="cpu", verbose=0
+    )
+    with open(os.path.join(run_dir, "architecture.txt"), "w", encoding="utf-8") as file:
+        file.write(str(model))
+        file.write("\n\n")
+        file.write(json.dumps(parameter_counts, indent=2))
+        file.write("\n\n")
+        file.write(str(model_statistics))
+    print(f"Run: {run_id}\nOutput: {run_dir}\nParameters: {parameter_counts}")
+    print(model)
+    if args.inspect:
+        print(model_statistics)
 
-    # 3. Lần lượt khởi tạo và huấn luyện từng mô hình
-    for idx, model_name in enumerate(models_to_train, 1):
-        print(f"\n>>> TIẾN HÀNH [{idx}/{len(models_to_train)}]: MÔ HÌNH {model_name.upper()} <<<")
-
-        # Khởi tạo mô hình
-        model = build_model(
-            model_name=model_name,
-            num_classes=NUM_CLASSES,
-            freeze_backbone=args.freeze,
-            fine_tune_last_layers=args.fine_tune_last,
-        )
-
-        # In thông tin kiến trúc nhanh
-        print(f"\n--- THÔNG SỐ KIẾN TRÚC MÔ HÌNH {model_name.upper()} ---")
-        inspect_model(model, input_size=(args.batch_size, 3, 224, 224), device="cpu", verbose=1)
-
-        # Khởi tạo logger TensorBoard cho mô hình này
-        if args.fine_tune_last:
-            comment_str = f"finetunelast_opt_{args.optimizer}"
-        else:
-            comment_str = f"freeze_{args.freeze}_opt_{args.optimizer}"
-        logger = TensorBoardLogger(
-            model_name=model_name,
-            log_dir=LOG_DIR,
-            comment=comment_str,
-        )
-
-        # Ghi log kiến trúc mạng (Graph) vào TensorBoard
-        dummy_input = torch.randn(2, 3, 224, 224).to(device)
-        logger.log_model_graph(model.to(device), dummy_input)
-
-        # Huấn luyện mô hình
-        res = train_model(
+    logger = TensorBoardLogger(run_dir)
+    if args.log_graph:
+        logger.log_model_graph(model.to(device), torch.randn(1, 3, 224, 224, device=device))
+    try:
+        return train_model(
             model=model,
             train_loader=train_loader,
-            val_loader=test_loader,
-            model_name=model_name,
-            num_epochs=args.epochs,
-            learning_rate=args.lr,
-            optimizer_type=args.optimizer,
-            device=device,
-            checkpoint_dir=CHECKPOINT_DIR,
+            val_loader=val_loader,
+            run_config=run_config,
+            run_dir=run_dir,
             logger=logger,
+            resume_path=resume_path,
+            device=device,
         )
-
+    finally:
         logger.close()
-        summary_results.append({
-            "model_name": res["model_name"],
-            "best_val_acc": round(res["best_val_acc"], 2),
-            "total_time_seconds": round(res["total_time_seconds"], 2),
-            "checkpoint_path": res["checkpoint_path"],
-        })
 
-    # 4. Lưu tổng kết huấn luyện ra file JSON
-    output_summary_file = os.path.join(RESULTS_DIR, "training_summary.json")
-    with open(output_summary_file, "w", encoding="utf-8") as f:
-        json.dump(summary_results, f, ensure_ascii=False, indent=4)
 
-    print(f"\n{'#'*70}")
-    print(f"   ĐÃ HOÀN TẤT HUẤN LUYỆN TOÀN BỘ CÁC MÔ HÌNH YÊU CẦU!")
-    print(f"   Bảng tóm tắt đã được lưu tại: {output_summary_file}")
-    print(f"   Để khởi động TensorBoard, chạy lệnh: tensorboard --logdir runs")
-    print(f"   Để chạy đánh giá và xuất bảng so sánh, chạy: python run_evaluation.py")
-    print(f"{'#'*70}\n")
+def main() -> None:
+    args = parse_arguments()
+    models_to_train = SUPPORTED_MODELS if args.model == "all" else [args.model]
+    summaries = [run_one(args, model_name) for model_name in models_to_train]
+    print(json.dumps(summaries, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
-    cli_args = parse_arguments()
-    run_training_pipeline(cli_args)
+    main()

@@ -1,0 +1,46 @@
+{
+  "member_id": "trainer_b",
+  "seed": 42,
+  "experiments": [
+    {
+      "run_id": "resnet18_freeze_baseline",
+      "model": "resnet18",
+      "strategy": "freeze",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    },
+    {
+      "run_id": "resnet18_finetune_last",
+      "model": "resnet18",
+      "strategy": "finetune_last",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.0001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    },
+    {
+      "run_id": "densenet121_freeze_baseline",
+      "model": "densenet121",
+      "strategy": "freeze",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    },
+    {
+      "run_id": "densenet121_finetune_last",
+      "model": "densenet121",
+      "strategy": "finetune_last",
+      "epochs": 10,
+      "batch_size": 32,
+      "learning_rate": 0.0001,
+      "optimizer": "adamw",
+      "weight_decay": 0.0001
+    }
+  ]
+}

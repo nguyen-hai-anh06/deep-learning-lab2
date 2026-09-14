@@ -18,6 +18,8 @@ BATCH_SIZE = 64               # Kích thước batch phù hợp huấn luyện t
 LEARNING_RATE = 0.001          # Tốc độ học khởi tạo cho Optimizer (Adam/SGD)
 NUM_EPOCHS = 10                # Số lượng epoch huấn luyện mặc định
 NUM_CLASSES = 10               # Số lượng nhãn phân loại của CIFAR-10
+VALIDATION_RATIO = 0.1         # 5,000 validation / 45,000 train
+RANDOM_SEED = 42               # Dùng chung để mọi thành viên có cùng data split
 MOMENTUM = 0.9                 # Momentum dùng khi cấu hình SGD optimizer
 WEIGHT_DECAY = 1e-4            # L2 Regularization chống overfitting
 NUM_WORKERS = 2                # Số tiến trình nạp dữ liệu đa luồng (multiprocessing)
@@ -29,8 +31,10 @@ SUPPORTED_MODELS = [
     "resnet18",       # He et al. - Residual Connections
     "vgg16",          # Simonyan & Zisserman - Deep Convolutional Networks
     "densenet121",    # Huang et al. - Densely Connected Convolutional Networks
-    "mobilenet_v2",   # Sandler et al. - Inverted Residuals & Mobile Architecture
+    "mobilenetv4_conv_small",  # MobileNetV4 Conv Small từ timm, pre-trained ImageNet-1K
 ]
+
+MOBILENET_V4_TIMM_NAME = "mobilenetv4_conv_small.e2400_r224_in1k"
 
 # ==============================================================================
 # THỐNG SỐ XỬ LÝ ẢNH CHUẨN THEO PRE-TRAINED IMAGENET

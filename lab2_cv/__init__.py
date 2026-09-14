@@ -11,6 +11,5 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-__version__ = "1.0.0"
-__author__ = "Antigravity Senior AI Architect"
+__version__ = "2.0.0"
 

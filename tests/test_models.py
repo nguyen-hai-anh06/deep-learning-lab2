@@ -1,7 +1,7 @@
 """
 Unit tests cho module model_service:
 Kiểm tra output shape (Batch_Size x 10) của cả 4 mô hình:
-['resnet18', 'vgg16', 'densenet121', 'mobilenet_v2'],
+['resnet18', 'vgg16', 'densenet121', 'mobilenetv4_conv_small'],
 đồng thời kiểm chứng cơ chế đóng băng (Freeze) và giải phóng (Unfreeze) trọng số.
 """
 
@@ -92,8 +92,8 @@ def test_invalid_model_name_raises_error():
 
 
 def test_inspect_model_torchinfo():
-    """Kiểm tra hàm inspect_model (Step 3 của bài Lab) thực thi trơn tru với MobileNetV2."""
-    model = build_model(model_name="mobilenet_v2", num_classes=NUM_CLASSES, freeze_backbone=True, pretrained=False)
+    """Kiểm tra inspect_model với MobileNetV4."""
+    model = build_model(model_name="mobilenetv4_conv_small", num_classes=NUM_CLASSES, freeze_backbone=True, pretrained=False)
     stats = inspect_model(model, input_size=(2, 3, 224, 224), device="cpu", verbose=0)
     
     assert stats is not None

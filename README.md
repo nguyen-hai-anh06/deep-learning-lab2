@@ -1,125 +1,117 @@
-# Practice 2: Pre-trained Neural Network Architectures on CIFAR-10
+# Practice 2 — Pre-trained Models on CIFAR-10
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nguyen-hai-anh06/deep-learning-lab2/blob/main/practice2_cv_colab.ipynb)
+Dự án so sánh ResNet-18, VGG-16, DenseNet-121 và MobileNetV4 Conv Small bằng transfer learning. Ba model đầu dùng `torchvision`; MobileNetV4 dùng model `mobilenetv4_conv_small.e2400_r224_in1k` của `timm` với trọng số ImageNet-1K.
 
-Báo cáo và mã nguồn thực nghiệm so sánh 4 kiến trúc mạng nơ-ron học sâu (Deep Convolutional Neural Networks) tiền huấn luyện (Pre-trained on ImageNet-1k) áp dụng kỹ thuật **Transfer Learning (Feature Extraction / Fine-Tuning)** trên tập dữ liệu **CIFAR-10**.
+## Quy trình dữ liệu
 
-## 📌 Các kiến trúc khảo sát
+- 45.000 ảnh train có augmentation.
+- 5.000 ảnh validation để chọn checkpoint và hyperparameter.
+- 10.000 ảnh test chỉ dùng trong bước đánh giá cuối.
+- Seed mặc định là 42. File `split.json` trong mỗi run chứa checksum để kiểm tra các thành viên dùng cùng split.
 
-1. **ResNet-18** (Residual Networks - Deep Residual Learning)
-2. **VGG-16** (Visual Geometry Group)
-3. **DenseNet-121** (Densely Connected Convolutional Networks)
-4. **MobileNetV2** (Inverted Residuals and Linear Bottlenecks)
+## Chạy trên Google Colab
 
----
+Mở `team_training_colab.ipynb`, bật GPU và chạy lần lượt các cell. Notebook lưu kết quả bền vững tại:
 
-## 📊 Kết quả thực nghiệm (Evaluation Results)
-
-Kết quả đánh giá trên tập kiểm thử (10,000 ảnh CIFAR-10 test set) với chế độ đóng băng backbone (Freeze Backbone, chỉ huấn luyện classifier):
-
-| Mô hình              | Test Accuracy (%) | Test Loss        | Tham số (Total) | Tham số huấn luyện (Trainable) | Dung lượng mô hình (MB) | Độ trễ (ms/batch) |
-| ---------------------- | ----------------- | ---------------- | ---------------- | --------------------------------- | --------------------------- | -------------------- |
-| **DenseNet-121** | **82.28%**  | **0.5221** | 6.96 M           | 10.25 K                           | 26.57 MB                    | 181.44 ms            |
-| **VGG-16**       | 81.30%            | 0.5505           | 134.30 M         | 40.97 K                           | 512.32 MB                   | 289.85 ms            |
-| **ResNet-18**    | 81.26%            | 0.5550           | 11.18 M          | 5.13 K                            | 42.65 MB                    | **51.96 ms**   |
-| **MobileNetV2**  | 75.97%            | 0.7076           | **2.24 M** | 12.81 K                           | **8.53 MB**           | 56.54 ms             |
-
-> Xem phân tích chi tiết và kịch bản thuyết trình tại [presentation.md](presentation.md).
-
----
-
-## 📁 Cấu trúc thư mục (Project Structure)
+`practice2_cv_colab.ipynb` là notebook cũ chứa kết quả MobileNetV2; không dùng notebook đó cho đợt thực nghiệm mới.
 
 ```text
-├── lab2_cv/                   # Core package chứa cấu hình và các services
-│   ├── config.py              # Tham số cấu hình, đường dẫn, hyper-parameters
-│   └── services/
-│       ├── data_service.py    # Pipeline nạp dữ liệu CIFAR-10, transforms, dataloaders
-│       ├── model_service.py   # Khởi tạo mô hình, đóng băng backbone, inspect kiến trúc
-│       ├── trainer_service.py # Huấn luyện, đánh giá, logging metrics
-│       └── logger_service.py  # Ghi log TensorBoard & console
-├── tests/                     # Unit tests kiểm thử hệ thống
-├── results/                   # Kết quả đánh giá và tóm tắt huấn luyện dạng JSON
-│   ├── evaluation_results.json
-│   └── training_summary.json
-├── train.py                   # Script CLI huấn luyện mô hình
-├── run_evaluation.py          # Script CLI đánh giá benchmark các mô hình
-├── practice2_cv_colab.ipynb   # Jupyter Notebook chạy thực nghiệm trên Google Colab
-├── presentation.md            # Báo cáo chi tiết và tài liệu thuyết trình
-├── requirements.txt           # Danh sách các thư viện phụ thuộc
-└── .gitignore                 # Cấu hình bỏ qua dữ liệu nặng và checkpoints
+/content/drive/MyDrive/Lab2_Experiments/
+  trainer_a/<run_id>/
+  trainer_b/<run_id>/
 ```
 
----
+Phân công mặc định:
 
-## 🚀 Cài đặt & Hướng dẫn sử dụng
+- `trainer_a`: VGG-16 và MobileNetV4.
+- `trainer_b`: ResNet-18 và DenseNet-121.
 
-### 0. Chạy trên Google Colab qua GitHub & Google Drive
+Mỗi người đổi biến `ROLE` trong notebook. File cấu hình tương ứng nằm trong `configs/`.
+Nếu hai người dùng Drive riêng, sau khi train hãy chia sẻ nguyên thư mục `trainer_a`/`trainer_b` cho người quản lý. Người quản lý đặt cả hai thư mục dưới cùng một `Lab2_Experiments` trước khi tổng hợp; không đổi tên `run_id` hoặc file bên trong.
 
-- **Cách 1 (Mở nhanh 1-Click)**: Bấm trực tiếp vào huy hiệu [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nguyen-hai-anh06/deep-learning-lab2/blob/main/practice2_cv_colab.ipynb) để mở notebook trên Colab.
-- **Cách 2 (Khuyên dùng - Clone vào Google Drive để lưu weights vĩnh viễn)**:
-  1. Mở Google Colab, chọn Runtime GPU T4 (**Runtime** -> **Change runtime type** -> **T4 GPU**).
-  2. Tạo 1 ô code để mount Google Drive và clone dự án từ GitHub:
-     ```python
-     from google.colab import drive
-     drive.mount('/content/drive')
-     %cd /content/drive/MyDrive
-     !git clone https://github.com/nguyen-hai-anh06/deep-learning-lab2.git
-     %cd deep-learning-lab2
-     ```
-  3. Mở file `practice2_cv_colab.ipynb` từ Google Drive để chạy thực nghiệm.
+## Nội dung được lưu cho mỗi run
 
-### 1. Cài đặt môi trường (Local máy cá nhân)
+```text
+<member_id>/<run_id>/
+  config.json
+  environment.json
+  split.json
+  architecture.txt
+  console.log
+  history.json
+  history.csv
+  summary.json
+  checkpoints/
+    last.pt
+    best.pt
+  tensorboard/
+```
 
-Khuyến nghị sử dụng Python 3.10+:
+`last.pt` và lịch sử được ghi sau mỗi epoch. Nếu Colab ngắt, chạy lại cùng assignment; `run_assignment.py` tự resume từ `last.pt` và bỏ qua run đã hoàn thành. `last.pt` gồm model, optimizer, scheduler, AMP scaler và trạng thái random/data loader; `best.pt` là checkpoint gọn hơn dùng để đánh giá.
+
+## Chạy một thí nghiệm
+
+```bash
+python train.py \
+  --model mobilenetv4_conv_small \
+  --strategy finetune_last \
+  --epochs 10 \
+  --batch-size 64 \
+  --lr 0.0001 \
+  --optimizer adamw \
+  --member-id trainer_a \
+  --run-id mobilenetv4_finetune_last \
+  --output-root /content/drive/MyDrive/Lab2_Experiments
+```
+
+Resume đúng run:
+
+```bash
+python train.py [các tham số giống lần đầu] --resume auto
+```
+
+Chạy toàn bộ phần được giao:
+
+```bash
+python run_assignment.py \
+  --config configs/trainer_a.json \
+  --output-root /content/drive/MyDrive/Lab2_Experiments \
+  --data-dir /content/cifar10_data
+```
+
+## TensorBoard
+
+```bash
+tensorboard --logdir /content/drive/MyDrive/Lab2_Experiments
+```
+
+TensorBoard ghi train/validation loss, accuracy và learning rate theo epoch. Có thể thêm model graph khi chạy một model bằng `--log-graph`.
+
+## Đánh giá cuối
+
+Sau khi gom đủ thư mục của hai trainer, người quản lý tổng hợp các kết quả validation trước:
+
+~~~bash
+python collect_results.py \
+  --experiments-root /content/drive/MyDrive/Lab2_Experiments
+~~~
+
+Sau khi kiểm tra bảng và đủ cả bốn model, chạy đánh giá test:
+
+```bash
+python run_evaluation.py \
+  --experiments-root /content/drive/MyDrive/Lab2_Experiments \
+  --output-dir /content/drive/MyDrive/Lab2_Experiments/final_evaluation \
+  --data-dir /content/cifar10_data
+```
+
+Script chọn run tốt nhất của từng model dựa trên validation accuracy, kiểm tra checksum data split, rồi đánh giá một lần trên test set. Kết quả gồm accuracy, loss, macro precision/recall/F1, confusion matrix, tham số và thời gian train.
+
+## Cài đặt local
 
 ```bash
 pip install -r requirements.txt
+pytest -q
 ```
 
-### 2. Huấn luyện mô hình
-
-- Huấn luyện một mô hình cụ thể (ví dụ: `resnet18`):
-
-```bash
-python train.py --model resnet18 --epochs 10 --batch_size 64
-```
-
-- Huấn luyện toàn bộ 4 mô hình:
-
-```bash
-python train.py --model all --epochs 10
-```
-
-- Chạy thử nghiệm nhanh (Dry-run với tập mẫu nhỏ 500 ảnh):
-
-```bash
-python train.py --model mobilenet_v2 --subset 500 --epochs 2
-```
-
-### 3. Đánh giá mô hình
-
-```bash
-python run_evaluation.py
-```
-
-### 4. Giám sát với TensorBoard
-
-```bash
-tensorboard --logdir=runs
-```
-
----
-
-## ⚙️ Lưu ý về Checkpoints & Data
-
-- Dữ liệu tập `cifar-10` và các file checkpoint trọng số mô hình (`checkpoints/*.pth`) có dung lượng lớn (đặc biệt VGG-16 > 500MB) vượt quá giới hạn lưu trữ của GitHub (>100MB), do đó đã được khai báo loại trừ trong `.gitignore`.
-- Bạn có thể tải lại dataset tự động bằng cách chạy `train.py` hoặc notebook `practice2_cv_colab.ipynb` trên Google Colab GPU.
-
----
-
-## 👤 Tác giả thực hiện
-
-- **Họ và tên**: Nguyễn Hải Anh - UTH
-- **GitHub**: [@nguyen-hai-anh06](https://github.com/nguyen-hai-anh06)
-- **Dự án**: Practice 2 - Pre-trained Neural Network Architectures
+Python 3.10+ được khuyến nghị.

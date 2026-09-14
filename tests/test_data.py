@@ -8,7 +8,11 @@ import torch
 from PIL import Image
 
 from lab2_cv.config import IMAGE_SIZE, IMAGENET_MEAN, IMAGENET_STD
-from lab2_cv.services.data_service import get_cifar10_transforms, get_cifar10_dataloaders
+from lab2_cv.services.data_service import (
+    create_split_indices,
+    get_cifar10_dataloaders,
+    get_cifar10_transforms,
+)
 
 
 def test_transforms_shape_and_type():
@@ -70,10 +74,11 @@ def test_dataloader_batch_shapes(monkeypatch):
     # Áp dụng monkeypatch thay thế datasets.CIFAR10 bằng MockCIFAR10
     monkeypatch.setattr("torchvision.datasets.CIFAR10", MockCIFAR10)
 
-    train_loader, test_loader = get_cifar10_dataloaders(
+    train_loader, val_loader, test_loader, metadata = get_cifar10_dataloaders(
         batch_size=test_batch_size,
         num_workers=0,
         subset_size=8,
+        validation_ratio=0.25,
     )
 
     # Lấy 1 batch từ train_loader
@@ -82,4 +87,17 @@ def test_dataloader_batch_shapes(monkeypatch):
     assert images.shape == (test_batch_size, 3, 224, 224), f"Kích thước batch ảnh sai: {images.shape}"
     assert labels.shape == (test_batch_size,), f"Kích thước nhãn sai: {labels.shape}"
     assert labels.dtype == torch.int64, "Nhãn phân loại phải là kiểu torch.int64 (LongTensor)"
+    assert len(val_loader.dataset) == 2
+    assert len(test_loader.dataset) >= 1
+    assert metadata["seed"] == 42
+
+
+def test_split_is_reproducible_and_disjoint():
+    train_a, val_a = create_split_indices(100, validation_ratio=0.2, seed=42)
+    train_b, val_b = create_split_indices(100, validation_ratio=0.2, seed=42)
+    assert train_a == train_b
+    assert val_a == val_b
+    assert len(train_a) == 80
+    assert len(val_a) == 20
+    assert set(train_a).isdisjoint(val_a)
 
