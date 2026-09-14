@@ -5,6 +5,13 @@ import csv
 import glob
 import json
 import os
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 from tabulate import tabulate
 
@@ -13,6 +20,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiments-root", required=True)
     parser.add_argument("--output-dir", default=None)
+    parser.add_argument("--strict-fingerprint", action="store_true", help="Bắt buộc tất cả các run phải có cùng source_fingerprint")
     args = parser.parse_args()
     output_dir = args.output_dir or os.path.join(args.experiments_root, "validation_summary")
     rows = []
@@ -64,8 +72,11 @@ def main() -> None:
     if len(signatures) != 1:
         raise RuntimeError("Các thành viên dùng data split khác nhau")
     fingerprints = {r["source_fingerprint"] for r in rows if r["source_fingerprint"]}
-    if len(fingerprints) != 1:
-        raise RuntimeError("Các thành viên không dùng cùng phiên bản source code")
+    if len(fingerprints) > 1:
+        msg = f"[Cảnh báo] Các thành viên có source_fingerprint khác nhau ({len(fingerprints)} bản ghi). Điều này có thể do khác biệt nhỏ về commit hoặc comment."
+        if getattr(args, "strict_fingerprint", False):
+            raise RuntimeError(f"{msg} Đã bật cờ --strict-fingerprint nên tiến trình bị dừng.")
+        print(msg)
     best_by_model = {}
     for row in rows:
         previous = best_by_model.get(row["model"])

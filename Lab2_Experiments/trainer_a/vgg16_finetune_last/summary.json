@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "vgg16_finetune_last",
+  "member_id": "trainer_a",
+  "model": "vgg16",
+  "strategy": "finetune_last",
+  "best_validation_accuracy": 93.86,
+  "best_epoch": 9,
+  "total_training_seconds_this_session": 1837.185224533081,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_a/vgg16_finetune_last/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_a/vgg16_finetune_last/checkpoints/last.pt"
+}

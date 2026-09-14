@@ -105,6 +105,27 @@ python run_evaluation.py \
 
 Script chọn run tốt nhất của từng model dựa trên validation accuracy, kiểm tra checksum data split, rồi đánh giá một lần trên test set. Kết quả gồm accuracy, loss, macro precision/recall/F1, confusion matrix, tham số và thời gian train.
 
+## Trực quan hóa kết quả & Báo cáo
+
+Chạy script sau để tự động tạo toàn bộ 7 biểu đồ chất lượng cao (DPI 300) và báo cáo Markdown:
+
+```bash
+python visualize_experiments.py \
+  --experiments-root Lab2_Experiments \
+  --output-dir results/visualizations
+```
+
+Các biểu đồ được xuất vào `results/visualizations/`:
+- `strategy_gain_comparison.png`: So sánh độ chính xác tăng trưởng giữa Freeze và Fine-tune.
+- `loss_curves_by_model.png`: Đường cong Loss 4 mô hình qua 10 epoch.
+- `accuracy_curves_by_model.png`: Đường cong Accuracy 4 mô hình qua 10 epoch.
+- `val_metrics_comparison_combined.png`: So sánh Val Loss & Val Accuracy trên cùng trục tọa độ.
+- `parameters_breakdown.png`: Phân tích số lượng tham số Total vs Trainable parameters.
+- `accuracy_vs_parameters.png`: Biểu đồ bong bóng (Bubble Chart) Độ chính xác vs Số tham số.
+- `training_time_comparison.png`: So sánh thời gian huấn luyện trên GPU Tesla T4.
+
+Xem tài liệu báo cáo khoa học đầy đủ tại [REPORT.md](REPORT.md) và tài liệu thuyết trình tại [presentation.md](presentation.md).
+
 ## Cài đặt local
 
 ```bash

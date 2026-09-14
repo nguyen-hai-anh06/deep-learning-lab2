@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "vgg16_freeze_baseline",
+  "member_id": "trainer_a",
+  "model": "vgg16",
+  "strategy": "freeze",
+  "best_validation_accuracy": 82.2,
+  "best_epoch": 7,
+  "total_training_seconds_this_session": 1673.0850372314453,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_a/vgg16_freeze_baseline/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_a/vgg16_freeze_baseline/checkpoints/last.pt"
+}

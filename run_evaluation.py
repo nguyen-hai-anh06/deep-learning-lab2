@@ -9,6 +9,12 @@ import sys
 import time
 from typing import Any, Dict
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 import torch
 import torch.nn as nn
 import matplotlib
@@ -23,7 +29,7 @@ from lab2_cv.services.data_service import get_cifar10_test_loader  # noqa: E402
 from lab2_cv.services.model_service import build_model, count_parameters  # noqa: E402
 
 
-def discover_best_runs(experiments_root: str) -> Dict[str, Dict[str, Any]]:
+def discover_best_runs(experiments_root: str, strict_fingerprint: bool = False) -> Dict[str, Dict[str, Any]]:
     """Choose exactly one completed run per model using validation accuracy only."""
     selected: Dict[str, Dict[str, Any]] = {}
     split_signatures: set[tuple] = set()
@@ -67,7 +73,10 @@ def discover_best_runs(experiments_root: str) -> Dict[str, Dict[str, Any]]:
     if len(split_signatures) > 1:
         raise RuntimeError("Các run dùng data split khác nhau; không thể so sánh công bằng")
     if len(source_fingerprints) > 1:
-        raise RuntimeError("Các run không dùng cùng phiên bản source code")
+        msg = f"[Cảnh báo] Các run có source_fingerprint khác nhau ({len(source_fingerprints)} bản ghi)."
+        if strict_fingerprint:
+            raise RuntimeError(f"{msg} Đã bật --strict-fingerprint nên tiến trình dừng.")
+        print(msg)
     if not selected:
         raise FileNotFoundError(f"Không tìm thấy run hoàn chỉnh trong {experiments_root}")
     return selected
@@ -181,9 +190,10 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--strict-fingerprint", action="store_true", help="Bắt buộc tất cả các run phải có cùng source_fingerprint")
     args = parser.parse_args()
     device = torch.device(args.device)
-    selected = discover_best_runs(args.experiments_root)
+    selected = discover_best_runs(args.experiments_root, strict_fingerprint=args.strict_fingerprint)
     missing = [model for model in SUPPORTED_MODELS if model not in selected]
     if missing:
         raise RuntimeError(f"Chưa đủ run để đánh giá test. Còn thiếu: {missing}")

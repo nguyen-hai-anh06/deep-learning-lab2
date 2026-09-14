@@ -1,0 +1,21 @@
+{
+  "run_id": "vgg16_finetune_last",
+  "member_id": "trainer_a",
+  "model": "vgg16",
+  "strategy": "finetune_last",
+  "pretrained": true,
+  "num_classes": 10,
+  "epochs": 10,
+  "batch_size": 32,
+  "learning_rate": 0.0001,
+  "optimizer": "adamw",
+  "weight_decay": 0.0001,
+  "momentum": 0.9,
+  "scheduler": "StepLR",
+  "scheduler_step_size": 5,
+  "scheduler_gamma": 0.1,
+  "seed": 42,
+  "validation_ratio": 0.1,
+  "amp": true,
+  "subset_size": null
+}

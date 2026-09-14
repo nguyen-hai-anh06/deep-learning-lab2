@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "densenet121_finetune_last",
+  "member_id": "trainer_b",
+  "model": "densenet121",
+  "strategy": "finetune_last",
+  "best_validation_accuracy": 94.4,
+  "best_epoch": 8,
+  "total_training_seconds_this_session": 1470.4617354869843,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/densenet121_finetune_last/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/densenet121_finetune_last/checkpoints/last.pt"
+}

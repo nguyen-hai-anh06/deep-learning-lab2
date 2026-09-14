@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "mobilenetv4_freeze_baseline",
+  "member_id": "trainer_a",
+  "model": "mobilenetv4_conv_small",
+  "strategy": "freeze",
+  "best_validation_accuracy": 87.96,
+  "best_epoch": 9,
+  "total_training_seconds_this_session": 1081.2996926307678,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_a/mobilenetv4_freeze_baseline/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_a/mobilenetv4_freeze_baseline/checkpoints/last.pt"
+}

@@ -1,0 +1,175 @@
+ResNet(
+  (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (relu): ReLU(inplace=True)
+  (maxpool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+  (layer1): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer2): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer3): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer4): Sequential(
+    (0): BasicBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): BasicBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (avgpool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (fc): Linear(in_features=512, out_features=10, bias=True)
+)
+
+{
+  "total_params": 11181642,
+  "trainable_params": 5130,
+  "non_trainable_params": 11176512
+}
+
+================================================================================================================
+Layer (type (var_name))                  Input Shape        Output Shape       Param #            Trainable
+================================================================================================================
+ResNet (ResNet)                          [1, 3, 224, 224]   [1, 10]            --                 Partial
+├─Conv2d (conv1)                         [1, 3, 224, 224]   [1, 64, 112, 112]  (9,408)            False
+├─BatchNorm2d (bn1)                      [1, 64, 112, 112]  [1, 64, 112, 112]  (128)              False
+├─ReLU (relu)                            [1, 64, 112, 112]  [1, 64, 112, 112]  --                 --
+├─MaxPool2d (maxpool)                    [1, 64, 112, 112]  [1, 64, 56, 56]    --                 --
+├─Sequential (layer1)                    [1, 64, 56, 56]    [1, 64, 56, 56]    --                 False
+│    └─BasicBlock (0)                    [1, 64, 56, 56]    [1, 64, 56, 56]    --                 False
+│    │    └─Conv2d (conv1)               [1, 64, 56, 56]    [1, 64, 56, 56]    (36,864)           False
+│    │    └─BatchNorm2d (bn1)            [1, 64, 56, 56]    [1, 64, 56, 56]    (128)              False
+│    │    └─ReLU (relu)                  [1, 64, 56, 56]    [1, 64, 56, 56]    --                 --
+│    │    └─Conv2d (conv2)               [1, 64, 56, 56]    [1, 64, 56, 56]    (36,864)           False
+│    │    └─BatchNorm2d (bn2)            [1, 64, 56, 56]    [1, 64, 56, 56]    (128)              False
+│    │    └─ReLU (relu)                  [1, 64, 56, 56]    [1, 64, 56, 56]    --                 --
+│    └─BasicBlock (1)                    [1, 64, 56, 56]    [1, 64, 56, 56]    --                 False
+│    │    └─Conv2d (conv1)               [1, 64, 56, 56]    [1, 64, 56, 56]    (36,864)           False
+│    │    └─BatchNorm2d (bn1)            [1, 64, 56, 56]    [1, 64, 56, 56]    (128)              False
+│    │    └─ReLU (relu)                  [1, 64, 56, 56]    [1, 64, 56, 56]    --                 --
+│    │    └─Conv2d (conv2)               [1, 64, 56, 56]    [1, 64, 56, 56]    (36,864)           False
+│    │    └─BatchNorm2d (bn2)            [1, 64, 56, 56]    [1, 64, 56, 56]    (128)              False
+│    │    └─ReLU (relu)                  [1, 64, 56, 56]    [1, 64, 56, 56]    --                 --
+├─Sequential (layer2)                    [1, 64, 56, 56]    [1, 128, 28, 28]   --                 False
+│    └─BasicBlock (0)                    [1, 64, 56, 56]    [1, 128, 28, 28]   --                 False
+│    │    └─Conv2d (conv1)               [1, 64, 56, 56]    [1, 128, 28, 28]   (73,728)           False
+│    │    └─BatchNorm2d (bn1)            [1, 128, 28, 28]   [1, 128, 28, 28]   (256)              False
+│    │    └─ReLU (relu)                  [1, 128, 28, 28]   [1, 128, 28, 28]   --                 --
+│    │    └─Conv2d (conv2)               [1, 128, 28, 28]   [1, 128, 28, 28]   (147,456)          False
+│    │    └─BatchNorm2d (bn2)            [1, 128, 28, 28]   [1, 128, 28, 28]   (256)              False
+│    │    └─Sequential (downsample)      [1, 64, 56, 56]    [1, 128, 28, 28]   (8,448)            False
+│    │    └─ReLU (relu)                  [1, 128, 28, 28]   [1, 128, 28, 28]   --                 --
+│    └─BasicBlock (1)                    [1, 128, 28, 28]   [1, 128, 28, 28]   --                 False
+│    │    └─Conv2d (conv1)               [1, 128, 28, 28]   [1, 128, 28, 28]   (147,456)          False
+│    │    └─BatchNorm2d (bn1)            [1, 128, 28, 28]   [1, 128, 28, 28]   (256)              False
+│    │    └─ReLU (relu)                  [1, 128, 28, 28]   [1, 128, 28, 28]   --                 --
+│    │    └─Conv2d (conv2)               [1, 128, 28, 28]   [1, 128, 28, 28]   (147,456)          False
+│    │    └─BatchNorm2d (bn2)            [1, 128, 28, 28]   [1, 128, 28, 28]   (256)              False
+│    │    └─ReLU (relu)                  [1, 128, 28, 28]   [1, 128, 28, 28]   --                 --
+├─Sequential (layer3)                    [1, 128, 28, 28]   [1, 256, 14, 14]   --                 False
+│    └─BasicBlock (0)                    [1, 128, 28, 28]   [1, 256, 14, 14]   --                 False
+│    │    └─Conv2d (conv1)               [1, 128, 28, 28]   [1, 256, 14, 14]   (294,912)          False
+│    │    └─BatchNorm2d (bn1)            [1, 256, 14, 14]   [1, 256, 14, 14]   (512)              False
+│    │    └─ReLU (relu)                  [1, 256, 14, 14]   [1, 256, 14, 14]   --                 --
+│    │    └─Conv2d (conv2)               [1, 256, 14, 14]   [1, 256, 14, 14]   (589,824)          False
+│    │    └─BatchNorm2d (bn2)            [1, 256, 14, 14]   [1, 256, 14, 14]   (512)              False
+│    │    └─Sequential (downsample)      [1, 128, 28, 28]   [1, 256, 14, 14]   (33,280)           False
+│    │    └─ReLU (relu)                  [1, 256, 14, 14]   [1, 256, 14, 14]   --                 --
+│    └─BasicBlock (1)                    [1, 256, 14, 14]   [1, 256, 14, 14]   --                 False
+│    │    └─Conv2d (conv1)               [1, 256, 14, 14]   [1, 256, 14, 14]   (589,824)          False
+│    │    └─BatchNorm2d (bn1)            [1, 256, 14, 14]   [1, 256, 14, 14]   (512)              False
+│    │    └─ReLU (relu)                  [1, 256, 14, 14]   [1, 256, 14, 14]   --                 --
+│    │    └─Conv2d (conv2)               [1, 256, 14, 14]   [1, 256, 14, 14]   (589,824)          False
+│    │    └─BatchNorm2d (bn2)            [1, 256, 14, 14]   [1, 256, 14, 14]   (512)              False
+│    │    └─ReLU (relu)                  [1, 256, 14, 14]   [1, 256, 14, 14]   --                 --
+├─Sequential (layer4)                    [1, 256, 14, 14]   [1, 512, 7, 7]     --                 False
+│    └─BasicBlock (0)                    [1, 256, 14, 14]   [1, 512, 7, 7]     --                 False
+│    │    └─Conv2d (conv1)               [1, 256, 14, 14]   [1, 512, 7, 7]     (1,179,648)        False
+│    │    └─BatchNorm2d (bn1)            [1, 512, 7, 7]     [1, 512, 7, 7]     (1,024)            False
+│    │    └─ReLU (relu)                  [1, 512, 7, 7]     [1, 512, 7, 7]     --                 --
+│    │    └─Conv2d (conv2)               [1, 512, 7, 7]     [1, 512, 7, 7]     (2,359,296)        False
+│    │    └─BatchNorm2d (bn2)            [1, 512, 7, 7]     [1, 512, 7, 7]     (1,024)            False
+│    │    └─Sequential (downsample)      [1, 256, 14, 14]   [1, 512, 7, 7]     (132,096)          False
+│    │    └─ReLU (relu)                  [1, 512, 7, 7]     [1, 512, 7, 7]     --                 --
+│    └─BasicBlock (1)                    [1, 512, 7, 7]     [1, 512, 7, 7]     --                 False
+│    │    └─Conv2d (conv1)               [1, 512, 7, 7]     [1, 512, 7, 7]     (2,359,296)        False
+│    │    └─BatchNorm2d (bn1)            [1, 512, 7, 7]     [1, 512, 7, 7]     (1,024)            False
+│    │    └─ReLU (relu)                  [1, 512, 7, 7]     [1, 512, 7, 7]     --                 --
+│    │    └─Conv2d (conv2)               [1, 512, 7, 7]     [1, 512, 7, 7]     (2,359,296)        False
+│    │    └─BatchNorm2d (bn2)            [1, 512, 7, 7]     [1, 512, 7, 7]     (1,024)            False
+│    │    └─ReLU (relu)                  [1, 512, 7, 7]     [1, 512, 7, 7]     --                 --
+├─AdaptiveAvgPool2d (avgpool)            [1, 512, 7, 7]     [1, 512, 1, 1]     --                 --
+├─Linear (fc)                            [1, 512]           [1, 10]            5,130              True
+================================================================================================================
+Total params: 11,181,642
+Trainable params: 5,130
+Non-trainable params: 11,176,512
+Total mult-adds (Units.GIGABYTES): 1.81
+================================================================================================================
+Input size (MB): 0.60
+Forward/backward pass size (MB): 39.74
+Params size (MB): 44.73
+Estimated Total Size (MB): 85.07
+================================================================================================================

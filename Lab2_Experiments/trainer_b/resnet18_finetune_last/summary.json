@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "resnet18_finetune_last",
+  "member_id": "trainer_b",
+  "model": "resnet18",
+  "strategy": "finetune_last",
+  "best_validation_accuracy": 95.22,
+  "best_epoch": 9,
+  "total_training_seconds_this_session": 1095.2470214366913,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/resnet18_finetune_last/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/resnet18_finetune_last/checkpoints/last.pt"
+}

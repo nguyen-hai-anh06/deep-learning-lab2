@@ -217,7 +217,10 @@ def train_model(
         gamma=run_config.get("scheduler_gamma", 0.1),
     )
     amp_enabled = bool(run_config.get("amp", True) and device.type == "cuda")
-    scaler = torch.cuda.amp.GradScaler(enabled=amp_enabled)
+    if hasattr(torch, "amp") and hasattr(torch.amp, "GradScaler"):
+        scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
+    else:
+        scaler = torch.cuda.amp.GradScaler(enabled=amp_enabled)
     start_epoch = 1
     best_val_acc = float("-inf")
     history: list[Dict[str, Any]] = []
@@ -281,7 +284,7 @@ def train_model(
         "model": run_config["model"],
         "strategy": run_config["strategy"],
         "best_validation_accuracy": best_val_acc,
-        "best_epoch": max(history, key=lambda row: row["validation_accuracy"])["epoch"],
+        "best_epoch": max(history, key=lambda row: row["validation_accuracy"])["epoch"] if history else 0,
         "total_training_seconds_this_session": time.time() - started,
         "epochs_completed": len(history),
         "best_checkpoint": best_path,

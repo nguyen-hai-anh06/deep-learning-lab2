@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "densenet121_freeze_baseline",
+  "member_id": "trainer_b",
+  "model": "densenet121",
+  "strategy": "freeze",
+  "best_validation_accuracy": 88.62,
+  "best_epoch": 7,
+  "total_training_seconds_this_session": 393.55213952064514,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/densenet121_freeze_baseline/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/densenet121_freeze_baseline/checkpoints/last.pt"
+}

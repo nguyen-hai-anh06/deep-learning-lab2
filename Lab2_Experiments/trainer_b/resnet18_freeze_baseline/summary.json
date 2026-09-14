@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_id": "resnet18_freeze_baseline",
+  "member_id": "trainer_b",
+  "model": "resnet18",
+  "strategy": "freeze",
+  "best_validation_accuracy": 86.46,
+  "best_epoch": 5,
+  "total_training_seconds_this_session": 415.2820174694061,
+  "epochs_completed": 10,
+  "best_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/resnet18_freeze_baseline/checkpoints/best.pt",
+  "last_checkpoint": "/content/drive/MyDrive/Lab2_Experiments/trainer_b/resnet18_freeze_baseline/checkpoints/last.pt"
+}
