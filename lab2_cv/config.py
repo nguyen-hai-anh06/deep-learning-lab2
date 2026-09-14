@@ -65,10 +65,4 @@ CIFAR10_CLASSES = [
 # ==============================================================================
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
-CHECKPOINT_DIR = os.path.join(BASE_DIR, "checkpoints")
-LOG_DIR = os.path.join(BASE_DIR, "runs")
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
-
-# Tự động tạo thư mục nếu chưa tồn tại
-for path in [DATA_DIR, CHECKPOINT_DIR, LOG_DIR, RESULTS_DIR]:
-    os.makedirs(path, exist_ok=True)

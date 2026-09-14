@@ -82,7 +82,7 @@ def evaluate_checkpoint(
         config["model"],
         num_classes=NUM_CLASSES,
         pretrained=False,
-        freeze_backbone=strategy != "full",
+        freeze_backbone=True,
         fine_tune_last_layers=strategy == "finetune_last",
     )
     checkpoint = torch.load(candidate["checkpoint_path"], map_location=device, weights_only=False)
